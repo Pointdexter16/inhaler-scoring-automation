@@ -34,7 +34,8 @@ class Datagen():
         while(gInd<len(gradient)):
             if gradient[gInd]>gradient[inhale]*0.01: #1% rate change of the strongest signal
                 end=endv(gInd)
-                signal.append((gradient[gInd],gInd/sr,end/sr))
+                if((end-gInd)/sr>0.4):
+                    signal.append((gradient[gInd],gInd/sr,end/sr))
                 gInd=end
             else:
                 gInd+=1
