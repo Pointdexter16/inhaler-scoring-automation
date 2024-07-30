@@ -34,7 +34,8 @@ def dataPointGen(path_sr,path_des):
         while(gInd<len(gradient)):
             if gradient[gInd]>gradient[inhale]/8:
                 end=endv(gInd)
-                signal.append((gradient[gInd],gInd/sr,end/sr))
+                if((end-gInd)/sr>=0.4):
+                    signal.append((gradient[gInd],gInd/sr,end/sr))
                 gInd=end
             else:
                 gInd+=1
