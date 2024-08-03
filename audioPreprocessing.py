@@ -7,20 +7,33 @@ import numpy as np
 
 extentions=['.mp3','.wav']
 
+
+def normalize(y):
+    max=np.abs(y[np.argmax(np.abs(y))])
+    if max==1:
+        return y
+    return y/np.abs(y[np.argmax(np.abs(y))])
+
+def audioFile(path):
+    _,extention=os.path.splitext(path)
+    if extention in extentions:
+        return True
+    return False
+
 def audioFileCheck(path):
     dirlist=[]
     for i in os.listdir(path):
-        _,extention=os.path.splitext(i)
-        if extention in extentions:
+        if audioFile(i):
             dirlist.append(i)
     return dirlist
 
-def noise(file,path_des):
+def noise(file,path_des=None):
 
-    y,sr=librosa.load(file,sr=None)
+    y,sr=librosa.load(file)
     reduce_noise=nr.reduce_noise(sr=sr,y=y)
+    if path_des==None:
+        return reduce_noise,sr
     outputfile=os.path.join(path_des,f'{os.path.splitext(os.path.basename(file))[0]}_cleaned.wav')
-    print(outputfile)
     sf.write(outputfile,reduce_noise,sr)
 
 def noise_cancellation(path_sr,path_des):
@@ -62,7 +75,20 @@ def plot(path):
         for y in range(Y):
             file=os.path.join(path,fileList[fileIndex])
             amp, sr = librosa.load(file,sr=None)
+            axs[x][y].set_title(fileList[fileIndex])
             librosa.display.waveshow(amp,sr=sr,ax=axs[x][y])
             fileIndex+=1
     plt.tight_layout()
     plt.show()
+
+def resize(sampleSize,y,sr):
+
+    new_sr=int((sampleSize*sr)/len(y))
+    y=normalize(y)
+    y_resample=librosa.resample(y,orig_sr=sr,target_sr=new_sr)
+    if len(y_resample)<sampleSize:
+        padding=sampleSize-len(y_resample)
+        y_resample=np.concatenate((y_resample,np.zeros((padding))))
+    return [y_resample]
+
+
