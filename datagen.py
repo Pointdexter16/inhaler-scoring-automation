@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pylab as plt
 import soundfile as sf
 import audioPreprocessing
+import moviepy.editor as mp
 import os
 
 class Datagen():
@@ -30,7 +31,13 @@ class Datagen():
     @staticmethod
     def detectSignal(path):
 
-        y,sr=audioPreprocessing.noise(path)        
+        if os.path.splitext(path)[1]=='.mp4':
+            video=mp.VideoFileClip(path)
+            video.audio.write_audiofile('temp.mp3')
+            y,sr=audioPreprocessing.noise('temp.mp3')
+            os.remove('temp.mp3') 
+        else:
+            y,sr=audioPreprocessing.noise(path)        
         new_y=audioPreprocessing.normalize(y)
         new_y_p=np.insert(new_y,0,0)
         new_y_z=np.insert(new_y,len(new_y)-1,0)
@@ -90,7 +97,7 @@ class Datagen():
 #method names are weird because i am bad at naming things this the best i can comeup with
 #sample dry run replace your paths here
 if __name__=='__main__':
-    demo=Datagen(path_sr='cleaned_audio',path_des='dataset')  #if you have different labels 
+    demo=Datagen(path_sr='vid',path_des='test_dataset')  #if you have different labels 
                                                             #pass in labels as a list under the parameter 
                                                             #name labels
             
