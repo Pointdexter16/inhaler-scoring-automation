@@ -5,6 +5,8 @@ import soundfile as sf
 import audioPreprocessing
 import moviepy.editor as mp
 import os
+import platform
+import subprocess
 
 class Datagen():
     def __init__(self,path_sr=None,path_des=None,labels=['inhale','exhale','none']) -> None:
@@ -69,19 +71,28 @@ class Datagen():
 
         print(f'No of signals detected: {len(signal)}')
         print("signals detected:\n",signal)
-        librosa.display.waveshow(y=y,sr=sr)
-        plt.show()
+
+        Platform=platform.system()
+        if (Platform=='Darwin'):
+            print(f'opening file {path}')
+            subprocess.call(('open',path))
+        else:
+            os.startfile(path)
 
         if label_data:
-            for i in signal:
-                a=int(input(f'what is {i}'))
+            for ind,i in enumerate(signal):
+                librosa.display.waveshow(y=y,sr=sr)
+                print(f'what is {i}')
+                plt.show()
+                a=int(input())
                 if a==3: break
                 if a not in [0,1,2]:
                     print('Try whole thing again')
                     os.rmdir(self.path_des)
                 startT=int(i[1]*sr)
                 endT=int(i[2]*sr)
-                sf.write(os.path.join(self.path_des,self.labels[a],file),y[startT:endT],sr)
+                file_name=os.path.splitext(file)[0].split('/')[-1]+f'_{ind}'+'.mp3'
+                sf.write(os.path.join(self.path_des,self.labels[a],file_name),y[startT:endT],sr)
 
 
     def dataPointGen(self):
@@ -93,11 +104,12 @@ class Datagen():
         files=audioPreprocessing.audioFileCheck(self.path_sr)
         for file in files:
             self.getData(file)
+
     
 #method names are weird because i am bad at naming things this the best i can comeup with
 #sample dry run replace your paths here
 if __name__=='__main__':
-    demo=Datagen(path_sr='vid',path_des='test_dataset')  #if you have different labels 
+    demo=Datagen(path_sr='pdi',path_des='data_pdi')  #if you have different labels 
                                                             #pass in labels as a list under the parameter 
                                                             #name labels
             
